@@ -1,8 +1,21 @@
 import json
+import logging
+
 import requests
 import time
 
 API_BASE_URL = f"https://api.tryleap.ai/api/v1/images/"
+
+
+def get_models(api_key):
+    url = f"{API_BASE_URL}models"
+
+    headers = {
+        "accept": "application/json",
+        "authorization": f"Bearer {api_key}"
+    }
+
+    return requests.get(url, headers=headers).json()
 
 
 # TODO: Add logging & Error Handling
@@ -62,7 +75,7 @@ def queue_training_job(model_id, headers):
     url = f"https://api.tryleap.ai/api/v1/images/models/{model_id}/queue"
     response = requests.post(url, headers=headers)
     data = json.loads(response.text)
-
+    logging.info(f"Training job response: {data}")
     version_id = data["id"]
     status = data["status"]
 
@@ -85,7 +98,7 @@ def get_model_version(model_id, version_id, headers):
     url = f"https://api.tryleap.ai/api/v1/images/models/{model_id}/versions/{version_id}"
     response = requests.get(url, headers=headers)
     data = json.loads(response.text)
-
+    logging.info(f"Get Model Version response: {data}")
     version_id = data["id"]
     status = data["status"]
 
@@ -111,15 +124,15 @@ def generate_image(model_id, prompt, headers):
     payload = {
         "prompt": prompt,
         "steps": 50,
-        "width": 512,
-        "height": 512,
+        "width": 1024,
+        "height": 1024,
         "numberOfImages": 1,
         "seed": 4523184
     }
 
     response = requests.post(url, json=payload, headers=headers)
     data = json.loads(response.text)
-
+    logging.info(f"Image Generation: {data}")
     inference_id = data["id"]
     status = data["status"]
 
